@@ -130,8 +130,9 @@ public class GPSDraw extends FragmentActivity implements GooglePlayServicesClien
 				if (PlaceholderFragment.location != null && lastLocation != null) {
 					PlaceholderFragment.location.setText(lastLocation);
 				}
+				
 				if (PlaceholderFragment.dataDisplay != null) {
-					PlaceholderFragment.dataDisplay.setText(dataPoints);
+					PlaceholderFragment.dataDisplay.setText(String.valueOf(dataPoints));
 				}
 			}
 		});
@@ -190,6 +191,7 @@ public class GPSDraw extends FragmentActivity implements GooglePlayServicesClien
 			location = (TextView) rootView.findViewById(R.id.location);
 			pen = (Switch) rootView.findViewById(R.id.switch1);
 			color = (RadioGroup) rootView.findViewById(R.id.radioGroup1);
+			dataDisplay = (TextView) rootView.findViewById(R.id.datapoints);
 			upload = (Button) rootView.findViewById(R.id.upload);
 						
 			pen.setOnCheckedChangeListener(this);
