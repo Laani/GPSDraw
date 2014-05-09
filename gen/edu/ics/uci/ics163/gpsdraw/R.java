@@ -228,8 +228,9 @@ containing a value of this type.
         public static final int ic_plusone_tall_off_client=0x7f02001c;
     }
     public static final class id {
-        public static final int action_settings=0x7f080011;
+        public static final int action_settings=0x7f080012;
         public static final int black=0x7f08000c;
+        public static final int colorsubmit=0x7f080011;
         public static final int container=0x7f080005;
         public static final int datapoints=0x7f08000e;
         public static final int datapoints_caption=0x7f08000f;

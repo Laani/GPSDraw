@@ -58,8 +58,9 @@ int drawable ic_plusone_medium_off_client 0x7f020019
 int drawable ic_plusone_small_off_client 0x7f02001a
 int drawable ic_plusone_standard_off_client 0x7f02001b
 int drawable ic_plusone_tall_off_client 0x7f02001c
-int id action_settings 0x7f080011
+int id action_settings 0x7f080012
 int id black 0x7f08000c
+int id colorsubmit 0x7f080011
 int id container 0x7f080005
 int id datapoints 0x7f08000e
 int id datapoints_caption 0x7f08000f

@@ -1,14 +1,5 @@
 package edu.ics.uci.ics163.gpsdraw;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesClient;
-import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
-import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.google.android.gms.location.LocationClient;
-import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.location.LocationRequest;
-
-import edu.uci.ics.ics163.gpsdrawupload.*;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.Fragment;
@@ -29,6 +20,17 @@ import android.widget.RadioGroup;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesClient;
+import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.location.LocationClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+
+import edu.uci.ics.ics163.gpsdrawupload.Point;
+import edu.uci.ics.ics163.gpsdrawupload.StrokeManager;
 
 public class GPSDraw extends FragmentActivity implements GooglePlayServicesClient.ConnectionCallbacks, OnConnectionFailedListener, LocationListener {
 	
@@ -55,9 +57,9 @@ public class GPSDraw extends FragmentActivity implements GooglePlayServicesClien
     private static String strokeName;
     private static int currentStroke;
 	private static boolean penDown;
-	private static int r;
-	private static int g;
-	private static int b;
+	private static int r = 255;
+	private static int g = 255;
+	private static int b = 0;
 	
 	public static class ErrorDialogFragment extends DialogFragment {
 		private Dialog mDialog;
@@ -155,6 +157,7 @@ public class GPSDraw extends FragmentActivity implements GooglePlayServicesClien
 		public static TextView location;
 		Switch pen;
 		RadioGroup color;
+		Button colorSubmit;
 		public static TextView dataDisplay;
 		Button upload;
 
@@ -176,14 +179,15 @@ public class GPSDraw extends FragmentActivity implements GooglePlayServicesClien
 			location = (TextView) rootView.findViewById(R.id.location);
 			pen = (Switch) rootView.findViewById(R.id.switch1);
 			color = (RadioGroup) rootView.findViewById(R.id.radioGroup1);
+			colorSubmit = (Button) rootView.findViewById(R.id.colorsubmit);
 			dataDisplay = (TextView) rootView.findViewById(R.id.datapoints);
 			upload = (Button) rootView.findViewById(R.id.upload);
 						
 			pen.setOnCheckedChangeListener(this);
 			
-			color.setOnClickListener(new View.OnClickListener() {
+			colorSubmit.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                	if (penDown) {
+                	if (!penDown) {
 	                	int col = color.getCheckedRadioButtonId();
 	                	if (col == R.id.yellow) {
 	                		r = 255;
@@ -191,9 +195,9 @@ public class GPSDraw extends FragmentActivity implements GooglePlayServicesClien
 	                		b = 0;
 	                	}
 	                	else if (col == R.id.black) {
-	                		r = 255;
-	                		g = 255;
-	                		b = 255;
+	                		r = 0;
+	                		g = 0;
+	                		b = 0;
 	                	}
 	                	else if (col == R.id.red) {
 	                		r = 255;
@@ -211,6 +215,7 @@ public class GPSDraw extends FragmentActivity implements GooglePlayServicesClien
                 		drawingName = drawingid.getText().toString();
                 	}
                 	mStrokeManager.upload(groupName, drawingName);
+            		Toast.makeText(getActivity(), "Strokes uploading...", Toast.LENGTH_SHORT).show();
                 }
             });
 			
@@ -223,8 +228,9 @@ public class GPSDraw extends FragmentActivity implements GooglePlayServicesClien
 			if (isChecked) {
 				penDown = true;
 				currentStroke++;
-				strokeName = "" + currentStroke;
+				strokeName = "" + System.currentTimeMillis();
 				mStrokeManager.setStrokeColor(strokeName, r, g, b);
+				Toast.makeText(getActivity(), strokeName + ": " + r + ", " + g + ", " + b, Toast.LENGTH_SHORT).show();
 			} else {
 				penDown = false;
 			}
