@@ -1,7 +1,5 @@
 package edu.ics.uci.ics163.gpsdraw;
 
-import java.util.ArrayList;
-
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
@@ -10,6 +8,7 @@ import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 
+import edu.uci.ics.ics163.gpsdrawupload.*;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.Fragment;
@@ -35,6 +34,7 @@ public class GPSDraw extends FragmentActivity implements GooglePlayServicesClien
 	
 	static LocationClient mLocationClient;
 	static LocationRequest mLocationRequest;
+	static StrokeManager mStrokeManager;
 	String lastLocation;
 	static boolean mRequestUpdates;
 	private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
@@ -42,7 +42,7 @@ public class GPSDraw extends FragmentActivity implements GooglePlayServicesClien
 	// Milliseconds per second
     private static final int MILLISECONDS_PER_SECOND = 1000;
     // Update frequency in seconds
-    public static final int UPDATE_INTERVAL_IN_SECONDS = 5;
+    public static final int UPDATE_INTERVAL_IN_SECONDS = 3;
     // Update frequency in milliseconds
     private static final long UPDATE_INTERVAL =
             MILLISECONDS_PER_SECOND * UPDATE_INTERVAL_IN_SECONDS;
@@ -52,10 +52,12 @@ public class GPSDraw extends FragmentActivity implements GooglePlayServicesClien
     private static final long FASTEST_INTERVAL =
             MILLISECONDS_PER_SECOND * FASTEST_INTERVAL_IN_SECONDS;
     
+    private static String strokeName;
     private static int currentStroke;
-	private static ArrayList<Pair> strokes;
-	private static int dataPoints;
 	private static boolean penDown;
+	private static int r;
+	private static int g;
+	private static int b;
 	
 	public static class ErrorDialogFragment extends DialogFragment {
 		private Dialog mDialog;
@@ -87,6 +89,8 @@ public class GPSDraw extends FragmentActivity implements GooglePlayServicesClien
 		mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 		mLocationRequest.setInterval(UPDATE_INTERVAL);
 		mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
+		
+		mStrokeManager = new StrokeManager();
 
 		if (savedInstanceState == null) {
 			getFragmentManager().beginTransaction()
@@ -132,25 +136,10 @@ public class GPSDraw extends FragmentActivity implements GooglePlayServicesClien
 				}
 				
 				if (PlaceholderFragment.dataDisplay != null) {
-					PlaceholderFragment.dataDisplay.setText(String.valueOf(dataPoints));
+					PlaceholderFragment.dataDisplay.setText(mStrokeManager.countStrokes() + "/" + mStrokeManager.countPoints());
 				}
 			}
 		});
-	}
-	
-	public class Pair<L,R> {
-
-		  private final L left;
-		  private final R right;
-
-		  public Pair(L left, R right) {
-		    this.left = left;
-		    this.right = right;
-		  }
-
-		  public L getLeft() { return left; }
-		  public R getRight() { return right; }
-
 	}
 
 	/**
@@ -158,7 +147,6 @@ public class GPSDraw extends FragmentActivity implements GooglePlayServicesClien
 	 */
 	public static class PlaceholderFragment extends Fragment implements OnCheckedChangeListener {
 		
-		int currentColor;
 		String groupName;
 		String drawingName;
 		
@@ -179,12 +167,9 @@ public class GPSDraw extends FragmentActivity implements GooglePlayServicesClien
 			View rootView = inflater.inflate(R.layout.fragment_gpsdraw,
 					container, false);
 			
-			strokes = new ArrayList<Pair>();
 			currentStroke = 0;
-			dataPoints = 0;
-			groupName = "JKNW";
-			drawingName = "testDraw";
-			currentColor = 0;
+			groupName = "jknw";
+			drawingName = "testdraw";
 			
 			groupid = (EditText) rootView.findViewById(R.id.groupid);
 			drawingid = (EditText) rootView.findViewById(R.id.drawingid);
@@ -198,13 +183,24 @@ public class GPSDraw extends FragmentActivity implements GooglePlayServicesClien
 			
 			color.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                	int col = color.getCheckedRadioButtonId();
-                	if (col == R.id.red)
-                		currentColor = 0;
-                	else if (col == R.id.green)
-                		currentColor = 1;
-                	else if (col == R.id.blue)
-                		currentColor = 2;
+                	if (penDown) {
+	                	int col = color.getCheckedRadioButtonId();
+	                	if (col == R.id.yellow) {
+	                		r = 255;
+	                		g = 255;
+	                		b = 0;
+	                	}
+	                	else if (col == R.id.black) {
+	                		r = 255;
+	                		g = 255;
+	                		b = 255;
+	                	}
+	                	else if (col == R.id.red) {
+	                		r = 255;
+	                		g = 0;
+	                		b = 0;
+	                	}
+                	}
                 }
             });
 			
@@ -214,10 +210,7 @@ public class GPSDraw extends FragmentActivity implements GooglePlayServicesClien
                 		groupName = groupid.getText().toString();
                 		drawingName = drawingid.getText().toString();
                 	}
-                	// upload shit.. something like:
-                	//	for (int i = 0; i < strokes.size(); i++) {
-                	//		upload(groupName, drawingName, i, timestamp, currentColor, strokes.get(i).getLeft(), strokes.get(i).getRight());
-                	//	}
+                	mStrokeManager.upload(groupName, drawingName);
                 }
             });
 			
@@ -229,6 +222,9 @@ public class GPSDraw extends FragmentActivity implements GooglePlayServicesClien
 				boolean isChecked) {
 			if (isChecked) {
 				penDown = true;
+				currentStroke++;
+				strokeName = "" + currentStroke;
+				mStrokeManager.setStrokeColor(strokeName, r, g, b);
 			} else {
 				penDown = false;
 			}
@@ -267,12 +263,10 @@ public class GPSDraw extends FragmentActivity implements GooglePlayServicesClien
 
 	@Override
 	public void onLocationChanged(Location location) {
-		lastLocation = "(" + location.getLatitude() + "," + location.getLongitude() + ")";
+		lastLocation = "(" + location.getLatitude() + ", " + location.getLongitude() + ")";
 		if (penDown) {
-			Pair<Double, Double> tuple = new Pair<Double, Double>(location.getLatitude(), location.getLongitude());
-			strokes.add(tuple);
-			currentStroke++;
-			dataPoints++;
+			Point dataPoint = new Point(System.currentTimeMillis(), location.getLatitude(), location.getLongitude());
+			mStrokeManager.addPoint(strokeName, dataPoint);
 		}
 		updateUI();
 	}

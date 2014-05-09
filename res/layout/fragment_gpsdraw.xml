@@ -60,23 +60,23 @@
         android:layout_marginTop="21dp" >
 
         <RadioButton
-            android:id="@+id/red"
+            android:id="@+id/yellow"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true"
+            android:text="YELLOW" />
+
+        <RadioButton
+            android:id="@+id/black"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="BLACK" />
+
+        <RadioButton
+            android:id="@+id/red"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:text="RED" />
-
-        <RadioButton
-            android:id="@+id/green"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="GREEN" />
-
-        <RadioButton
-            android:id="@+id/blue"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="BLUE" />
     </RadioGroup>
 
     <TextView
@@ -85,7 +85,7 @@
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/datapoints_caption"
         android:layout_below="@+id/datapoints_caption"
-        android:text="DATA POINTS"
+        android:text="#/#"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <Button
@@ -103,7 +103,7 @@
         android:layout_alignLeft="@+id/location"
         android:layout_below="@+id/radioGroup1"
         android:layout_marginTop="35dp"
-        android:text="Data Points"
+        android:text="Strokes/Points"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
 </RelativeLayout>
