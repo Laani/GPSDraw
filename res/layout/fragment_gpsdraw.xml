@@ -16,7 +16,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="5dp"
         android:ems="10"
-        android:hint="testDraw" >
+        android:hint="Drawing ID" >
 
         <requestFocus />
 
@@ -30,7 +30,7 @@
         android:layout_alignParentTop="true"
         android:layout_marginTop="5dp"
         android:ems="10"
-        android:hint="JKNW" />
+        android:hint="Group ID" />
 
     <TextView
         android:id="@+id/location"
